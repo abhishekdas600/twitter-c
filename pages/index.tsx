@@ -10,6 +10,8 @@ import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
 import toast from "react-hot-toast"
 import { graphqlClient } from "@/clients/api"
 import { verifyUserGoogleTokenQuery } from "@/graphql/query/user"
+import { useCurrentUser } from "@/hooks/user"
+import { useQueryClient } from "@tanstack/react-query"
 
 
 interface TwitterSidebarButton{
@@ -46,6 +48,10 @@ const sidebarMenuItems: TwitterSidebarButton[] =[
 
 export default function Home() {
 
+  const {user} = useCurrentUser();
+  const queryClient = useQueryClient();
+  console.log(user);
+
    const handleLoginWithGoogle = useCallback(async (cred : CredentialResponse) => {
     const googleToken = cred.credential
     if(!googleToken){
@@ -56,9 +62,10 @@ export default function Home() {
     console.log(verifyGoogleToken);
 
     if(verifyGoogleToken) {
-      window.localStorage.setItem('twitter_clone_token', verifyGoogleToken)
+      window.localStorage.setItem('twitter_clone_token', verifyGoogleToken);
     }
-  },[])
+    await queryClient.invalidateQueries({queryKey: ["current-user"]});
+  },[queryClient])
 
   return (
     <div>
@@ -79,9 +86,17 @@ export default function Home() {
             
           </div>
          <div>
-         <button className="bg-blue-500  py-3 rounded-full mt-4 w-[74%] font-semibold  hover:bg-blue-400">Post</button>
+         <button className="bg-blue-500  py-3 rounded-full mt-4 mb-20 w-[74%] font-semibold  hover:bg-blue-400">Post</button>
          </div>
-           
+         {user && <div className="mt-20 ml-10 flex  gap-3 px-3 mr-12 py-3 rounded-full  hover:bg-slate-700 cursor-pointer transition-all">
+          {user && user.profileImageUrl &&
+          <Image className="rounded-full"
+          src={user?.profileImageUrl} 
+          alt="User-image" 
+          height={50} 
+          width={50}/> }
+          <h3>{user.firstName} {user.lastName}</h3>
+         </div>}  
           
         </div>
         <div className='col-span-5 border-[1px] border-gray-500 '>
@@ -95,10 +110,10 @@ export default function Home() {
           </div>
         </div>
         <div className='col-span-4 '>
-          <div className="border p-6 mr-20 mt-5 ml-3 bg-slate-700 rounded-lg">
+          {!user&&<div className="border p-6 mr-20 mt-5 ml-3 bg-slate-700 rounded-lg">
             <h4>New to Twitter?</h4>
           <GoogleLogin onSuccess={handleLoginWithGoogle}/>
-          </div>
+          </div>}
           
         </div>
       </div>
