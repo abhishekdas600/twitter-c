@@ -7,6 +7,7 @@ query GetAllTweets{
         id
         imageUrl
         author {
+          id
           firstName
           lastName
           profileImageUrl

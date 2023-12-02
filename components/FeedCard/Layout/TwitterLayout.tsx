@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import Image from "next/image";
 import { CgProfile } from "react-icons/cg";
 import { GoBell } from "react-icons/go";
@@ -11,6 +11,7 @@ import { graphqlClient } from "@/clients/api";
 import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
 import { useQueryClient } from "@tanstack/react-query";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import Link from "next/link";
 
 interface TwitterLayoutProps {
     children: React.ReactNode
@@ -18,39 +19,51 @@ interface TwitterLayoutProps {
 interface TwitterSidebarButton{
     title: string,
     icon: React.ReactNode
+    link: string
   }
 
-const sidebarMenuItems: TwitterSidebarButton[] =[
-    {
-      title: 'Home',
-      icon: <MdHomeFilled />
-    },
-    {
-      title: 'Explore',
-      icon: <RiSearchLine />
-    },
-    {
-      title: 'Notifications',
-      icon: <GoBell />
-    },
-    {
-      title: 'Messages',
-      icon: <MdOutlineMailOutline/>
-    },
-    {
-      title: 'Lists',
-      icon: <HiOutlineClipboardList />
-    },
-    {
-      title: 'Profile',
-      icon: <CgProfile />
-    }
-  ]
+
 
 const TwitterLayout: React.FC<TwitterLayoutProps>= (props) => {
-
-    const {user} = useCurrentUser(); 
+  const {user} = useCurrentUser(); 
     const queryClient = useQueryClient();   
+    
+  const sidebarMenuItems: TwitterSidebarButton[] = useMemo( () =>
+    [
+      {
+        title: 'Home',
+        icon: <MdHomeFilled />,
+        link: '/'
+      },
+      {
+        title: 'Explore',
+        icon: <RiSearchLine />,
+        link: '/'
+      },
+      {
+        title: 'Notifications',
+        icon: <GoBell />,
+        link: '/'
+      },
+      {
+        title: 'Messages',
+        icon: <MdOutlineMailOutline/>,
+        link: '/'
+      },
+      {
+        title: 'Lists',
+        icon: <HiOutlineClipboardList />,
+        link: '/'
+      },
+      {
+        title: 'Profile',
+        icon: <CgProfile />,
+        link: `/${user?.id}`
+      }
+    ],[user?.id]
+   )
+    
+    
     const handleLoginWithGoogle = useCallback(async (cred : CredentialResponse) => {
         const googleToken = cred.credential
         if(!googleToken){
@@ -61,7 +74,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps>= (props) => {
         console.log(verifyGoogleToken);
     
         if(verifyGoogleToken) {
-          window.localStorage.setItem('twitter_token', verifyGoogleToken);
+          window.localStorage.setItem('twitter_clone_token', verifyGoogleToken);
         }
         await queryClient.invalidateQueries({queryKey: ["current-user"]});
       },[queryClient])
@@ -74,19 +87,25 @@ const TwitterLayout: React.FC<TwitterLayoutProps>= (props) => {
         <div className='col-span-2 sm:col-span-4  pt-5 flex justify-end '>
           
           <div className="mt-1 text-2xl  pl-2 ">
-          <div className=' text-3xl hover:bg-slate-600 rounded-full h-fit w-fit p-2 pl-5 sm:pl-0 cursor-pointer transition-all'>
+          <div className=' text-3xl hover:bg-slate-600 rounded-full h-fit w-fit p-2 pl-5 sm:pl-2 cursor-pointer transition-all'>
           <RiTwitterXFill />
           </div>
             <ul>
             {sidebarMenuItems.map(item => {
               return (
-                <li className="flex justify-start items-center gap-5  hover:bg-slate-600 rounded-full h-fit w-fit py-2 pl-5 sm:pl-2 pr-2 sm:pr-7 cursor-pointer transition-all " key={item.title}><span>{item.icon}</span><span className="hidden sm:inline">{item.title}</span></li>
+                <li  key={item.title}>
+                  <Link className="flex justify-start items-center gap-5  hover:bg-slate-600 rounded-full h-fit w-fit py-2 pl-5 sm:pl-2 pr-2 sm:pr-7 cursor-pointer transition-all "
+                  href= {item.link}>
+                  <span>{item.icon}</span>
+                  <span className="hidden sm:inline">{item.title}</span>
+                  </Link>
+                  </li>
               )
             })}
             </ul>
             <button className="hidden sm:block bg-blue-500  py-3 rounded-full mt-4 mb-20 w-[74%] font-semibold  hover:bg-blue-400">Post</button>
             <button className="block sm:hidden ml-2 sm:ml-0 bg-blue-500  p-3 rounded-full mt-4 mb-20  font-semibold  hover:bg-blue-400"><RiTwitterXFill /></button>
-            {user && <div className="pr-5 sm:pr-0 mt-20  flex  gap-3 px-2  py-3 rounded-full text-xl hover:bg-slate-700 cursor-pointer transition-all">
+            {user && <div className="pr-5 sm:pr-0 mt-20 mr-4 flex  gap-3 px-2  py-3 rounded-full text-xl hover:bg-slate-700 cursor-pointer transition-all">
           {user && user.profileImageUrl &&
           <Image className=" rounded-full "
           src={user?.profileImageUrl} 
@@ -103,7 +122,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps>= (props) => {
         <div className='col-span-10 sm:col-span-6 lg:col-span-4 border-[1px] border-gray-500 overflow-y-scroll no-scrollbar'>
             {props.children}
         </div>
-        <div className='hidden lg:col-span-4 '>
+        <div className='col-span-4 '>
           {!user&&<div className="border p-6 mr-20 mt-5 ml-3 bg-slate-700 rounded-lg">
             <h4>New to Twitter?</h4>
           <GoogleLogin onSuccess={handleLoginWithGoogle}/>
