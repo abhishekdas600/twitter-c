@@ -12,6 +12,7 @@ import Link from "next/link";
 
 interface ServerProps {
     userInfo? : User;
+    
 }
 
 const UserProfilePage: NextPage <ServerProps>= (props) => {
@@ -44,7 +45,7 @@ const UserProfilePage: NextPage <ServerProps>= (props) => {
                      <h1 className="text-xl p-4">{props.userInfo?.firstName} {props.userInfo?.lastName}</h1>
                    </div>}
                    <div className="mt-10">
-                    { props.userInfo && props.userInfo.tweets && props.userInfo.tweets.map(tweet => tweet? <FeedCard key={tweet.id} data={tweet as Tweet}/>: null )}
+                    { props.userInfo && props.userInfo.tweets  && props.userInfo.tweets.map(tweet => tweet? <FeedCard key={tweet.id} data={tweet as Tweet}/>: null )}
                    </div>
                 </div>
             </TwitterLayout>

@@ -71,7 +71,7 @@ const TwitterLayout: React.FC<TwitterLayoutProps>= (props) => {
         }
         const {verifyGoogleToken} = await graphqlClient.request(verifyUserGoogleTokenQuery, {token : googleToken});
         toast.success('Verified Success')
-        console.log(verifyGoogleToken);
+        // console.log(verifyGoogleToken);
     
         if(verifyGoogleToken) {
           window.localStorage.setItem('twitter_clone_token', verifyGoogleToken);

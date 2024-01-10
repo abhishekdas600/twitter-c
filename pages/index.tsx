@@ -8,7 +8,10 @@ import { Tweet } from "@/gql/graphql"
 import TwitterLayout from "@/components/FeedCard/Layout/TwitterLayout";
 import { GetServerSideProps } from "next"
 import { graphqlClient } from "@/clients/api"
-import { getAllTweetsQuery } from "@/graphql/query/tweet"
+import { getAllTweetsQuery, getSignedURLForTweetQuery } from "@/graphql/query/tweet"
+import axios from "axios"
+import toast from "react-hot-toast"
+import { useRouter } from "next/navigation"
 
 interface HomeProps {
   tweets?: Tweet[]
@@ -19,23 +22,58 @@ export default function Home(props: HomeProps) {
   const {user} = useCurrentUser();
   const {mutate} = useCreateTweet();
 
+  const [imageUrl, setImageURL] = useState("");
+  const [content, setContent] = useState("");
   
-  const [content, setContent] = useState("")
+  const handleInputChangeFile = useCallback((input: HTMLInputElement)=> {
+    return async(event: Event) => {
+      event.preventDefault();
+      const file: File | null | undefined = input.files?.item(0);
+      if(!file) return; 
+
+      const {getSignedURLForTweet} = await graphqlClient.request(getSignedURLForTweetQuery, {
+        imageName: file.name,
+        imageType: file.type
+      })
+
+      if(getSignedURLForTweet){
+        toast.loading('Uploading...', {id: '2'});
+        await axios.put(getSignedURLForTweet, file, {
+          headers: {
+            "Content-Type": file.type
+          }
+        })
+        toast.success('Upload Completed', {id: '2'});
+        const url = new URL(getSignedURLForTweet);
+        const myFilePath = `${url.origin}${url.pathname}`;
+        setImageURL(myFilePath)
+      }
+      
+    }
+  }, [])
   
   const handleSelectImage = useCallback(()=>{
     const input = document.createElement('input')
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'image/*');
+    
+    const handlerFn = handleInputChangeFile(input);
+
+    input.addEventListener('change', handlerFn)
+
     input.click();
-  }, []);
+  }, [handleInputChangeFile]);
 
   const handleCreateTweet = useCallback(()=>{
     mutate({
-      content
+      content,
+      imageUrl
     })
 
     setContent("");
-  },[content, mutate])
+    setImageURL("");
+    
+  },[content, mutate, imageUrl])
 
    
 
@@ -59,6 +97,9 @@ export default function Home(props: HomeProps) {
                  rows={3}
                  placeholder="What is happening?!">
                  </textarea>
+                 {
+                  imageUrl && <Image src={imageUrl} alt={"tweet image"} width={300} height={300}/>
+                 }
                  <div className="flex justify-between items-center mt-2">
                   <div className="text-cyan-400 hover:bg-slate-700 p-2 rounded-full transition-all" >
                   <GoImage onClick={handleSelectImage}  className="text-xl"/>

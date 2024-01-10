@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["lh3.googleusercontent.com"]
+    domains: ["lh3.googleusercontent.com","abhishek-twitter-bucket.s3.ap-south-1.amazonaws.com"]
   },
 }
 
