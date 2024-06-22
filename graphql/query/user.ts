@@ -14,6 +14,27 @@ query GetCurrentUser {
     email
     firstName
     lastName
+    followers {
+      firstName
+      lastName
+      id
+      email
+      profileImageUrl
+    }
+    following {
+      firstName
+      lastName
+      id
+      email
+      profileImageUrl
+    }
+    recommendedUsers {
+      email
+      firstName
+      lastName
+      profileImageUrl
+      id
+    }
     tweets {
       content
       imageUrl
@@ -25,7 +46,8 @@ query GetCurrentUser {
 
       }
       id
-    }  
+    }
+   
   }
 }
 `)
@@ -37,6 +59,20 @@ query GetUserById($id: ID!) {
     firstName
     lastName
     profileImageUrl
+    followers {
+      firstName
+      lastName
+      id
+      email
+      profileImageUrl
+    }
+    following {
+      firstName
+      lastName
+      id
+      email
+      profileImageUrl
+    }
     tweets {
       id
       content
@@ -48,6 +84,7 @@ query GetUserById($id: ID!) {
         profileImageUrl
       }
     }
+    
   }
 }
 `)

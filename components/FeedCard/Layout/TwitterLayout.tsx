@@ -78,6 +78,12 @@ const TwitterLayout: React.FC<TwitterLayoutProps>= (props) => {
         }
         await queryClient.invalidateQueries({queryKey: ["current-user"]});
       },[queryClient])
+
+      const handleLogout = useCallback(async()=>{
+        if(!user) throw new Error("No User Found");
+        window.localStorage.removeItem('twitter_clone_token');
+        await queryClient.invalidateQueries({queryKey: ["current-user"]});
+      },[queryClient, user]);
     
 
     return (
@@ -127,6 +133,37 @@ const TwitterLayout: React.FC<TwitterLayoutProps>= (props) => {
             <h4>New to Twitter?</h4>
           <GoogleLogin onSuccess={handleLoginWithGoogle}/>
           </div>}
+          {
+            user&& <div>
+              <div>
+                <button onClick={handleLogout}>Logout</button>
+              </div>
+             {user.recommendedUsers && <div className=" mt-7 w-fit rounded-3xl bg-slate-800 p-2 ml-3">
+                 <h1 className="ml-3 ">Users you may know</h1>
+                
+                  <ul>
+                   {
+                     user.recommendedUsers.map((recUser)=>{
+                     return (
+                      <li key={recUser?.id} className="flex gap-2 items-center m-2  w-fit p-2  ">
+                         { recUser?.profileImageUrl && <Image
+                          src={recUser?.profileImageUrl} 
+                          alt="profile image" 
+                          height={50} 
+                          width={50} 
+                          className="rounded-full"/>}
+                          <span>{recUser?.firstName} {recUser?.lastName}</span>
+                          <Link href={`/${recUser?.id}`} className="ml-3 px-2 py-1 bg-blue-600 rounded-full text-sm">View</Link>
+                      </li>
+                     )
+                    }) 
+                   }
+                    
+                  </ul>
+                 
+              </div>}
+            </div>
+          }
           
         </div>
       </div>

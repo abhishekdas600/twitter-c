@@ -35,7 +35,11 @@ const FeedCard: React.FC <FeedCardProps>= ((props)=> {
                         <BiRepost />
                     </div>
                     <div className="rounded-full p-1 hover:bg-slate-500 transition-all">
+                        <div>
                         <AiOutlineHeart />
+                       
+                        </div>
+                         
                     </div>
                     <div className="rounded-full p-1 hover:bg-slate-500 transition-all">
                         <FiShare />

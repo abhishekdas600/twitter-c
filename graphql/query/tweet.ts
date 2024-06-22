@@ -12,6 +12,7 @@ query GetAllTweets{
           lastName
           profileImageUrl
         }
+       
       }
 }
 
